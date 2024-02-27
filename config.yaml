@@ -6,10 +6,9 @@ column_typing_dict:
   else_cols_as_type: 'float'
 column_adjustments_dict:
   dollars_conversion:
-    col_list_type: all_but
-    col_list: ['Period', 'ABN', 'Institution Name']
+    all_but: ['Period', 'ABN', 'Institution Name']
     ordered_adjustments:
-      multiply: 1000
+      multiply: 1000000
 expected_columns_list: [
   'Period',
   'ABN',
@@ -42,3 +41,9 @@ expected_columns_list: [
   'Deposits by community service organisations',
   'Total residents deposits',
 ]
+
+calculated_columns:
+  'Business Loans': [
+    ['add', 'Loans to non-financial businesses'],
+    ['add', 'Loans to financial institutions'],
+  ]
