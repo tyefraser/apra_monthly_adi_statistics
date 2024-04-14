@@ -1,0 +1,78 @@
+# File Loading
+file_loading_details:
+  sheet_name: 'Table 1'
+  skiprows: 1
+
+expected_columns_and_types_dict:
+  'Period': 'date'
+  'ABN': 'str'
+  'Institution Name': 'str'
+  'Cash and deposits with financial institutions': 'float'
+  'Trading securities': 'float'
+  'Investment securities': 'float'
+  'Net acceptances of customers': 'float'
+  'Total residents assets': 'float'
+  'Total securitised assets on balance sheet': 'float'
+  'Loans to non-financial businesses': 'float'
+  'Loans to financial institutions': 'float'
+  'Loans to general government': 'float'
+  'Loans to households: Housing: Owner-occupied': 'float'
+  'Loans to households: Housing: Investment': 'float'
+  'Loans to households: Credit cards': 'float'
+  'Loans to households: Other': 'float'
+  'Loans to community service organisations': 'float'
+  'Total residents loans and finance leases': 'float'
+  'Intra-group loans and finance leases': 'float'
+  'Acceptances': 'float'
+  'Intra-group deposits': 'float'
+  'Negotiable Certificates of Deposit': 'float'
+  'Total short-term borrowings': 'float'
+  'Total long-term borrowings': 'float'
+  'Deposits by non-financial businesses': 'float'
+  'Deposits by financial institutions': 'float'
+  'Deposits by general government': 'float'
+  'Deposits by households': 'float'
+  'Deposits by community service organisations': 'float'
+  'Total residents deposits': 'float'
+
+# 'column_type_lists' is generated in code to group the `expected_columns_and_types_dict` by type
+
+# column settings
+column_settings:
+  # Grouping Columns
+  company_column: 'Institution Name'
+  abn_column: 'ABN'
+  
+  # Set default selections
+  default_company: 'Macquarie Bank Limited'
+
+
+# Apply column adjustments (optional)
+column_adjustments_dict:
+  dollars_conversion:
+    all_but: ['Period', 'ABN', 'Institution Name']
+    ordered_adjustments:
+      multiply: 1000000
+
+# Generate calculated columns for source data (optional)
+source_data_calculated_columns:
+  'Business Loans': [
+    ['add', 'Loans to non-financial businesses'],
+    ['add', 'Loans to financial institutions'],
+  ]
+
+# Generate calculated columns for summary data (optional)
+summary_data_calculated_columns:
+  'Total Loans for Housing': [
+    ['add', 'Loans to households: Housing: Owner-occupied'],
+    ['add', 'Loans to households: Housing: Investment'],
+  ]
+  'Loans to Housing: Owner-occupied Property Percentage': [
+    ['add', 'Loans to households: Housing: Owner-occupied'],
+    ['divide', 'Total Loans for Housing'],
+  ]
+  'Loans to Housing: Investment Property Percentage': [
+    ['add', 'Loans to households: Housing: Investment'],
+    ['divide', 'Total Loans for Housing'],
+  ]
+

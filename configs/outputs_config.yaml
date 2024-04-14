@@ -1,0 +1,54 @@
+# Define reference period to use in analysis
+reference_dates_config:
+  # Entry for 1 month ago
+  1_month:
+    info:
+      months_int: 1
+      name: "1 month"  # Name of the period
+      over_period: "Over the last month"  # Description of the period
+    fallback: null  # No fallback, this is the last option for 1 month
+
+  # Entry for 6 months ago
+  6_months:
+    info:
+      months_int: 6
+      name: "6 months"
+      over_period: "Over the last 6 months"
+    fallback: null  # No fallback, this is the last option for 6 months
+
+  # Entry for 12 months ago
+  12_months:
+    info:
+      months_int: 12
+      name: "1 year"
+      over_period: "Over the last year"
+    fallback: null  # No fallback, this is the last option for 12 months
+
+  # Entry for 120 months ago (10 years)
+  long_term:
+    info:
+      months_int: 120
+      name: "10 years"
+      over_period: "Over the past 10 years"
+    fallback:
+      # Fallback if 10 years ago is not available, try 5 years
+      long_term:
+        info:
+          months_int: 60
+          name: "5 years"
+          over_period: "Over the past 5 years"
+        fallback:
+          # Fallback if 5 years ago is not available, try 4 years
+          long_term:
+            info:
+              months_int: 40
+              name: "4 years"
+              over_period: "Over the past 4 years"
+            fallback:
+              # Fallback if 4 years ago is not available, final fallback is 3 years
+              long_term:
+                info:
+                  months_int: 36
+                  name: "3 years"
+                  over_period: "Over the past 3 years"
+                fallback: null  # No further fallback after 3 years

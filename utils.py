@@ -1,4 +1,6 @@
-from yaml import safe_load, YAMLError
+
+from math import floor, log10
+from dateutil.relativedelta import relativedelta
 
 import os
 from pathlib import Path
@@ -33,7 +35,7 @@ def setup_logging(default_path='logging_config.yaml', default_level=logging.INFO
         logging.basicConfig(level=default_level)
 
 # Set up logging using the configuration file
-setup_logging()
+# setup_logging()
 
 # Create a logger variable
 logger = logging.getLogger(__name__)
@@ -62,15 +64,6 @@ def assert_file_extension(
         logger.info(f"AssertionError: {e}")
         raise AssertionError(f"AssertionError: {e}")
 
-def read_yaml(file_path: str):
-    try:
-        with open(file_path, 'r') as file:
-            yaml_data = safe_load(file)
-        return yaml_data
-    except FileNotFoundError:
-        print(f"Error: File '{file_path}' not found.")
-    except YAMLError as e:
-        print(f"Error parsing YAML in '{file_path}': {e}")
 
 def rounded_number(number):
     if (number is None) or (isnan(number)):
@@ -127,3 +120,118 @@ def rounded_dollars(dollars):
 def rounded_dollars_md(dollars):
     sign, dollars, scale = rounded_number(number = dollars)
     return f'{sign}\\$&nbsp;{dollars}&nbsp;{scale}'
+
+
+def dollar_movement_text(
+          dollar_movement
+):
+    if dollar_movement > 0:
+        txt = f'increased by {rounded_dollars_md(dollar_movement)}'
+    elif dollar_movement < 0:
+        txt = f'decreased by {rounded_dollars_md(dollar_movement)}'
+    else:
+        txt = 'remained unchanged'
+    
+    return txt
+
+def movement_text(
+          movement
+):
+    if movement > 0:
+        txt = f'increased'
+    elif movement < 0:
+        txt = f'decreased'
+    else:
+        txt = 'remained unchanged'
+    
+    return txt
+
+
+
+
+
+def escape_dollar_signs(text):
+    # Escaping all dollar signs for Markdown and avoiding HTML entities
+    return text.replace("$", "\\$").replace("\\\\$", "\\$")
+
+def movement_values(
+    start: float,
+    end: float,
+):
+    # Movement variables
+    movement = (end - start)
+    movement_perc = movement/start
+
+    return movement, movement_perc
+
+def percentage_to_string(percentage):
+    if percentage == 0:
+        return "0%"
+    
+    # Calculate the magnitude as the number of digits before the decimal point
+    magnitude = floor(-log10(percentage))
+    
+    # Adjust precision based on the magnitude
+    # Ensure a minimum of 1 digit and a maximum of 5 digits after the decimal
+    precision = min(max(magnitude, 1), 5)
+    
+    # Format the percentage string with dynamic precision
+    percentage_str = f"{percentage * 100:.{precision}f}%"
+    
+    return percentage_str
+
+def ranking_position(rank):
+    # Get last digiti in rank number
+    last_digit = rank % 10
+    last_2_digits = rank % 100
+    rank_str = str(int(rank))
+
+    # Get position wording
+    if last_digit == 1 and (last_2_digits != 11):
+        position = rank_str + 'st'
+    elif last_digit == 2 and (last_2_digits != 12):
+        position = rank_str + 'nd'
+    elif last_digit == 3 and (last_2_digits != 13):
+        position = rank_str + 'rd'
+    else:
+        position = rank_str + 'th'
+    
+    return position
+
+def period_ago(months_ago):
+    if months_ago == 0:
+        period_txt = 'current month'
+    elif (months_ago % 12) == 0:
+        yrs = months_ago / 12
+        if yrs == 1:
+            period_txt = 'year'
+        else:
+            period_txt = f"{int(yrs)} years"
+    else:
+        if months_ago == 1:
+            period_txt = 'month'
+        else:
+            period_txt = f"{int(months_ago)} months"
+    return period_txt
+
+def period_ago_prefix(months_ago):
+    if months_ago == 0:
+        prefix_txt = 'current month'
+    elif months_ago == 1:
+        prefix_txt = 'MoM'
+    elif (months_ago / 12) == 1:
+        prefix_txt = 'YoY'
+    elif (months_ago % 12) == 0:
+        yrs = months_ago / 12
+        prefix_txt = f"{int(yrs)} years"
+    else:
+        prefix_txt = f"{int(months_ago)} months"
+    return prefix_txt
+
+def position_s_movement(position_movement):
+    if position_movement == 1:
+        text = 'position'
+    else:
+        text = 'positions'
+    return text
+
