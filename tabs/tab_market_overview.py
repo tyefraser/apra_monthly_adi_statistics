@@ -19,14 +19,8 @@ def generate_market_overview_tab(
 
     # Housing Market
     st.write("## Housing Market")
-    st.write(
-        f"""
-        The housing market is divided into owner-occupied and investment property loans.
-        As at {selected_date.strftime('%d %B %Y')} the market is divided as follows:
-        """
-    )
-    
-    st.plotly_chart(summary_dict['summary_housing_info']['housing_percentages_pie'])
+
+    st.plotly_chart(summary_dict['summary_loans_dict']['housing_percentages_pie'])
 
     ## st.write("### Housing - Period Movements")
     ## st.write(
@@ -50,7 +44,7 @@ def generate_market_overview_tab(
 
     # Display the DataFrame with right-aligned data
     st.write("Movement across periods:")
-    st.dataframe(summary_dict['summary_housing_info']['movements_table'], use_container_width=True, hide_index=True)
+    ##st.dataframe(summary_dict['summary_housing_info']['movements_table'], use_container_width=True, hide_index=True)
     
 
 
@@ -59,5 +53,5 @@ def generate_market_overview_tab(
     ##     The following graph contains the investment and owner-occupied movements as a monthly average for comparability:
     ##     """
     ## )
-    st.plotly_chart(summary_dict['summary_housing_info']['housing_movements_annualised'])
+    # st.plotly_chart(summary_dict['summary_housing_info']['housing_movements_annualised'])
     

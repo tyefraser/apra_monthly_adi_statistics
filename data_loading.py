@@ -407,13 +407,14 @@ def data_loader(
             file_name=original_file_name,
             date_column=date_column,
         )
-
+        
         # Generate summary data frame
         df_summary = generate_summary(
                 df=df_source,
                 date_column=date_column,
                 data_config_dict=data_config_dict,
         )
+        ## TO DO: Check all months from start to end have all month end dates
 
         # Generate original data frame
         df_original = generate_original(
@@ -421,6 +422,7 @@ def data_loader(
             date_column=date_column,
             data_config_dict=data_config_dict,
         )
+        ## To do: check all months, start to end for the companies
 
         # Write data frame to pickle file
         with open(df_original_pkl, 'wb') as f:

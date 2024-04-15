@@ -18,6 +18,8 @@ from select_filters import select_data_filters
 ## from summary_generator import generate_summary
 
 from tabs.tab_market_overview import generate_market_overview_tab
+from tabs.tab_loans import generate_loans_tab
+from tabs.tab_deposits import generate_deposits_tab
 
 # Setup logging
 close_log_handlers()
@@ -98,7 +100,7 @@ st.write("Please make your filtering selections below:")
 )
 
 # Create summary data outputs
-from outputs_summary import generate_summary_outputs
+from outputs.outputs_summary import generate_summary_outputs
 summary_dict = generate_summary_outputs(
     df_summary,
     date_column,
@@ -110,7 +112,7 @@ summary_dict = generate_summary_outputs(
 
 
 # Insert containers separated into tabs:
-tab_market, tab_todo, tab_about = st.tabs(["Market Overview", "To Do", "About"])
+tab_market, tab_loans, tab_deposits, tab_about = st.tabs(["Market Overview", "Loans", "Deposits", "About"])
 
 # Market Overview Tab
 with tab_market:
@@ -120,13 +122,22 @@ with tab_market:
         selected_date=selected_date,
     )
 
-# Tab - to do
-with tab_todo:
-    st.write("Under construction.")
-    # tab_aggregate_content(
-    #     df=dfs_dict['original'],
-    #     selected_date=selections_dict['selected_date'],
-    # )
+# Loans Tab
+with tab_loans:
+    generate_loans_tab(
+        summary_dict=summary_dict,
+        date_column=date_column,
+        selected_date=selected_date,
+    )
+
+# Deposits Tab
+with tab_deposits:
+    generate_deposits_tab(
+        summary_dict=summary_dict,
+        date_column=date_column,
+        selected_date=selected_date,
+    )
+
 
 # Tab 3 content
 with tab_about:
