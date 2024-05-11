@@ -278,30 +278,37 @@ def generate_summary(
     return df_summary
 
 
-def rank_companies_old(df, date_column, value_cols):
+def fill_company_data_for_all_dates(
+        df_original,
+        date_column,
+        company_column,
+):
     """
-    Ranks companies within each month for specified value columns.
-    
-    Parameters:
-    - df: DataFrame containing the data.
-    - date_column: Column name with datetime representing the month.
-    - value_cols: List of column names with dollar amounts to rank.
-    
-    Returns:
-    - DataFrame with ranks added for each value column.
+    Ensures every company has data all dates
     """
-    # Function to rank companies within each group
-    def rank_within_group(group, cols):
-        for col in cols:
-            rank_col_name = f"{col} - Rank"
-            group[rank_col_name] = group[col].rank(method='dense', ascending=False).astype('int')
-        return group
-    
-    # Apply the ranking function for each month and value column
-    ranked_df = df.groupby(date_column).apply(rank_within_group, value_cols)
-    
-    return ranked_df
 
+    # Create a date range covering all months in your data
+    date_range = pd.date_range(start=df_original[date_column].min(), end=df_original[date_column].max(), freq='M')
+
+    # Create a DataFrame of all unique companies and all months
+    all_companies = df_original[company_column].unique()
+    all_periods = pd.DataFrame(date_range, columns=[date_column])
+    all_periods['key'] = 1
+    all_companies_df = pd.DataFrame(all_companies, columns=[company_column])
+    all_companies_df['key'] = 1
+
+    # Cartesian product of companies and periods
+    complete_df = pd.merge(all_periods, all_companies_df, on='key')[[date_column, company_column]].copy()
+    complete_df = complete_df[[date_column, company_column]].copy()
+
+    # Merge with the original DataFrame
+    final_df = pd.merge(complete_df, df_original, on=[date_column, company_column], how='left')
+    final_df
+
+    # Replace NaNs with zeros
+    final_df.fillna(0, inplace=True)
+
+    return final_df
 
 def rank_companies(df, date_column, value_cols):
     """
@@ -331,7 +338,7 @@ def rank_companies(df, date_column, value_cols):
     return ranked_df
 
 
-def generate_original(
+def generate_original( ## To DO: Cal this "clean" rather than "original" and update source to original
         df,
         date_column,
         data_config_dict,
@@ -352,6 +359,8 @@ def generate_original(
 
     # Remove excluded columns
     df_original = df_original.drop(columns=[abn_column])
+
+    # Ensure every company has data completed within each row
 
     # Generate ranking columns
     group_by_columns = (

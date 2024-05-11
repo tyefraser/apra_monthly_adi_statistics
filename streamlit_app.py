@@ -99,17 +99,19 @@ st.write("Please make your filtering selections below:")
     default_company=default_company,
 )
 
+
 # Create summary data outputs
-from outputs.outputs_summary import generate_summary_outputs
+from calc_summary.calc_summary_outputs import generate_summary_outputs
 summary_dict = generate_summary_outputs(
-    df_summary,
-    date_column,
-    selected_date,
-    top_x_value,
-    outputs_config_dict,
+    df_summary=df_summary,
+    pkl_folder_name=pkl_folder_name,
+    date_column=date_column,
+    selected_date=selected_date,
+    top_x_value=top_x_value,
+    outputs_config_dict=outputs_config_dict,
 )
 
-
+# Create entity data outputs
 
 # Insert containers separated into tabs:
 tab_market, tab_loans, tab_deposits, tab_about = st.tabs(["Market Overview", "Loans", "Deposits", "About"])
