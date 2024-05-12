@@ -93,11 +93,7 @@ def read_yamls():
         raise ValueError("There must only be 1 date column.")
     date_column = data_config_dict['column_type_lists']['date'][0] # 'Period'
 
-    # outputs config
-    outputs_config_dict = read_yaml(file_path = 'configs/outputs_config.yaml')
-
     # Validate yaml files
     validate_yamls(data_config_dict=data_config_dict)
 
-    return aliases_dict, color_discrete_map, data_config_dict, date_column, outputs_config_dict
-    
+    return aliases_dict, color_discrete_map, data_config_dict, date_column

@@ -113,9 +113,11 @@ def rounded_number(number):
     logger.info(formatted_amount)
     return sign, formatted_amount, scales[scale_index]
 
+
 def rounded_dollars(dollars):
     sign, dollars, scale = rounded_number(number = dollars)
     return f'{sign}$ {dollars} {scale}'
+
 
 def rounded_dollars_md(dollars):
     sign, dollars, scale = rounded_number(number = dollars)
@@ -123,7 +125,7 @@ def rounded_dollars_md(dollars):
 
 
 def dollar_movement_text(
-          dollar_movement
+        dollar_movement
 ):
     if dollar_movement > 0:
         txt = f'increased by {rounded_dollars_md(dollar_movement)}'
@@ -147,9 +149,6 @@ def movement_text(
     return txt
 
 
-
-
-
 def escape_dollar_signs(text):
     # Escaping all dollar signs for Markdown and avoiding HTML entities
     return text.replace("$", "\\$").replace("\\\\$", "\\$")
@@ -163,6 +162,12 @@ def movement_values(
     movement_perc = movement/start
 
     return movement, movement_perc
+
+
+# Define a function for formatting percentages
+def format_percentage(value):
+    return f"({value * 100:.1f}%)"
+
 
 def percentage_to_string(percentage):
     if percentage == 0:

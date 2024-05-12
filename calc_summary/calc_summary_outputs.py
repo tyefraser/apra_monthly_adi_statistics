@@ -53,14 +53,14 @@ def generate_summary_outputs(
         date_column,
         selected_date,
         top_x_value,
-        outputs_config_dict,
+        data_config_dict,
 ):
     logger.info("Executing: generate_summary_outputs")
 
     # Set pickle variable path
     summary_dict_pkl=os.path.join(
         pkl_folder_name,
-        f"summary_pickle-{date_column}-{selected_date}-{top_x_value}.pkl"
+        f"summary_pickle_{selected_date.strftime('%Y-%m-%d')}_top_{top_x_value}.pkl"
     )
 
     # Check if summary data already exists and load it, otherwise create the data
@@ -79,7 +79,7 @@ def generate_summary_outputs(
         reference_dates = determine_reference_dates(
             selected_date=selected_date,
             available_dates=set(df_summary[date_column]),
-            date_periods=outputs_config_dict['reference_dates_config'],
+            date_periods=data_config_dict['reference_dates_config'],
         )
 
         # Create the summary output df for the selected date

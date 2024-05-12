@@ -2,10 +2,10 @@ import plotly.express as px
 import pandas as pd
 import plotly.graph_objects as go
 
-from calc_summary.outputs_utils import determine_reference_dates
-from calc_summary.outputs_utils import column_pos_and_neg_movements_chart
-from calc_summary.outputs_utils import generate_bar_chart
-from calc_summary.outputs_utils import generate_pos_neg_charts
+from calc_summary.summary_utils import determine_reference_dates
+from calc_summary.summary_utils import column_pos_and_neg_movements_chart
+from calc_summary.summary_utils import generate_bar_chart
+from calc_summary.summary_utils import generate_pos_neg_charts
 from utils import movement_text, dollar_movement_text, rounded_dollars
 
 def generate_housing_percentages_pie(

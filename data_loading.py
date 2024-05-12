@@ -279,7 +279,7 @@ def generate_summary(
 
 
 def fill_company_data_for_all_dates(
-        df_original,
+        df_cleaned,
         date_column,
         company_column,
 ):
@@ -288,10 +288,10 @@ def fill_company_data_for_all_dates(
     """
 
     # Create a date range covering all months in your data
-    date_range = pd.date_range(start=df_original[date_column].min(), end=df_original[date_column].max(), freq='M')
+    date_range = pd.date_range(start=df_cleaned[date_column].min(), end=df_cleaned[date_column].max(), freq='M')
 
     # Create a DataFrame of all unique companies and all months
-    all_companies = df_original[company_column].unique()
+    all_companies = df_cleaned[company_column].unique()
     all_periods = pd.DataFrame(date_range, columns=[date_column])
     all_periods['key'] = 1
     all_companies_df = pd.DataFrame(all_companies, columns=[company_column])
@@ -302,7 +302,7 @@ def fill_company_data_for_all_dates(
     complete_df = complete_df[[date_column, company_column]].copy()
 
     # Merge with the original DataFrame
-    final_df = pd.merge(complete_df, df_original, on=[date_column, company_column], how='left')
+    final_df = pd.merge(complete_df, df_cleaned, on=[date_column, company_column], how='left')
     final_df
 
     # Replace NaNs with zeros
@@ -338,46 +338,51 @@ def rank_companies(df, date_column, value_cols):
     return ranked_df
 
 
-def generate_original( ## To DO: Cal this "clean" rather than "original" and update source to original
+def generate_cleaned_df( ## To DO: Cal this "clean" rather than "original" and update source to original
         df,
         date_column,
         data_config_dict,
 ):
     # Initiate dataframe
-    df_original = df.copy()
+    df_cleaned = df.copy()
 
     # Get company and abn column names
     company_column = data_config_dict['column_settings']['company_column']
     abn_column = data_config_dict['column_settings']['abn_column']
 
     # First, find all unique companies that have duplicates in any given month
-    duplicate_companies = df_original[df_original.duplicated([date_column, company_column], keep=False)][company_column].unique()
+    duplicate_companies = df_cleaned[df_cleaned.duplicated([date_column, company_column], keep=False)][company_column].unique()
 
     # Append ABN to these company names globally across all their occurrences
     for company in duplicate_companies:
-        df_original.loc[df_original[company_column] == company, company_column] = df_original[company_column] + ' (' + df[abn_column] + ')'
+        df_cleaned.loc[df_cleaned[company_column] == company, company_column] = df_cleaned[company_column] + ' (' + df[abn_column] + ')'
 
     # Remove excluded columns
-    df_original = df_original.drop(columns=[abn_column])
+    df_cleaned = df_cleaned.drop(columns=[abn_column])
 
     # Ensure every company has data completed within each row
+    df_cleaned = fill_company_data_for_all_dates(
+        df_cleaned=df_cleaned,
+        date_column=date_column,
+        company_column=company_column,
+    )
 
     # Generate ranking columns
     group_by_columns = (
         data_config_dict['column_type_lists']['str'] + data_config_dict['column_type_lists']['date']
     )
-    ranking_columns = list(set(df_original.columns) - set(group_by_columns))
-    df_original = rank_companies(
-        df=df_original,
+    ranking_columns = list(set(df_cleaned.columns) - set(group_by_columns))
+    df_cleaned = rank_companies(
+        df=df_cleaned,
         date_column=date_column,
         value_cols=ranking_columns,
     )
     # for col in ranking_columns:
     #     rank_col_name = f"{col} - rank"
     #     # Adjust ranking method here. Using 'average' (default) or 'first'.
-    #     df_original[rank_col_name] = df_original.groupby(date_column)[col].rank(method="first").astype('int')
+    #     df_cleaned[rank_col_name] = df_cleaned.groupby(date_column)[col].rank(method="first").astype('int')
 
-    return df_original
+    return df_cleaned
 
 def data_loader(
         pkl_folder_name,
@@ -388,16 +393,21 @@ def data_loader(
 
     # Set pickle variable paths
     df_original_pkl=os.path.join(pkl_folder_name, "df_original.pkl")
+    df_cleaned_pkl=os.path.join(pkl_folder_name, "df_cleaned.pkl")
     df_summary_pkl=os.path.join(pkl_folder_name, "df_summary.pkl")
 
     # Check if data has already been loaded into pkl file
-    if os.path.exists(df_original_pkl) and os.path.exists(df_summary_pkl):
+    if os.path.exists(df_cleaned_pkl) and os.path.exists(df_summary_pkl):
         # Data exists, load it from pickle
         logger.info("Loading data from pickle files")
 
         # Load df original data
         with open(df_original_pkl, 'rb') as f:
             df_original = pickle.load(f)
+
+        # Load df cleaned data
+        with open(df_cleaned_pkl, 'rb') as f:
+            df_cleaned = pickle.load(f)
         
         # Load df summary data
         with open(df_summary_pkl, 'rb') as f:
@@ -411,7 +421,7 @@ def data_loader(
         original_file_name=load_url_xlsx()
 
         # Read and process data
-        df_source = read_and_process_data(
+        df_original = read_and_process_data(
             data_config_dict=data_config_dict,
             file_name=original_file_name,
             date_column=date_column,
@@ -419,27 +429,28 @@ def data_loader(
         
         # Generate summary data frame
         df_summary = generate_summary(
-                df=df_source,
+                df=df_original,
                 date_column=date_column,
                 data_config_dict=data_config_dict,
         )
-        ## TO DO: Check all months from start to end have all month end dates
 
         # Generate original data frame
-        df_original = generate_original(
-            df=df_source,
+        df_cleaned = generate_cleaned_df(
+            df=df_original,
             date_column=date_column,
             data_config_dict=data_config_dict,
         )
-        ## To do: check all months, start to end for the companies
 
         # Write data frame to pickle file
         with open(df_original_pkl, 'wb') as f:
             pickle.dump(df_original, f)
+
+        with open(df_cleaned_pkl, 'wb') as f:
+            pickle.dump(df_cleaned, f)
 
         # Write summary data frame to pickle file
         with open(df_summary_pkl, 'wb') as f:
             pickle.dump(df_summary, f)
 
     logger.info("Executed: data_loader")
-    return df_original, df_summary
+    return df_original, df_cleaned, df_summary

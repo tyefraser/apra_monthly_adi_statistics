@@ -17,6 +17,9 @@ from select_filters import select_data_filters
 ## from descriptions import generate_descriptions
 ## from summary_generator import generate_summary
 
+from calc_summary.calc_summary_outputs import generate_summary_outputs
+from calc_entity.calc_entity_outputs import generate_entity_outputs
+
 from tabs.tab_market_overview import generate_market_overview_tab
 from tabs.tab_loans import generate_loans_tab
 from tabs.tab_deposits import generate_deposits_tab
@@ -39,8 +42,7 @@ if (
     ('aliases_dict' not in st.session_state or st.session_state.aliases_dict is None) or
     ('color_discrete_map' not in st.session_state or st.session_state.color_discrete_map is None) or
     ('data_config_dict' not in st.session_state or st.session_state.data_config_dict is None) or
-    ('date_column' not in st.session_state or st.session_state.date_column is None) or
-    ('outputs_config_dict' not in st.session_state or st.session_state.outputs_config_dict is None)
+    ('date_column' not in st.session_state or st.session_state.date_column is None)
 ):
     logger.info("Reading yaml from files")
 
@@ -48,8 +50,7 @@ if (
         st.session_state.aliases_dict,
         st.session_state.color_discrete_map,
         st.session_state.data_config_dict,
-        st.session_state.date_column,
-        st.session_state.outputs_config_dict,
+        st.session_state.date_column
     ) = read_yamls()
 
 else:
@@ -60,7 +61,7 @@ aliases_dict = st.session_state.aliases_dict
 color_discrete_map = st.session_state.color_discrete_map
 data_config_dict = st.session_state.data_config_dict
 date_column = st.session_state.date_column
-outputs_config_dict = st.session_state.outputs_config_dict
+
 
 # Grouping Columns
 company_column = data_config_dict['column_settings']['company_column'] # 'Institution Name'
@@ -70,7 +71,7 @@ group_by_columns = [date_column] + [company_column]
 default_company = data_config_dict['column_settings']['default_company'] # 'Macquarie Bank Limited'
 
 # Get data
-df_original, df_summary = data_loader(
+df_original, df_cleaned, df_summary = data_loader(
     pkl_folder_name=pkl_folder_name,
     data_config_dict=data_config_dict,
     date_column=date_column,
@@ -80,7 +81,7 @@ df_original, df_summary = data_loader(
 st.write("""
     # APRA - Monthly ADI Statistics (MADIS)
     """)
-reporting_date = df_original[date_column].max()
+reporting_date = df_cleaned[date_column].max()
 st.write(f"Reporting date: {reporting_date.strftime('%d %B %Y')}") # Present the reporting_date in the format of '30th December 2023'
 
 
@@ -92,7 +93,7 @@ st.write("Please make your filtering selections below:")
     selected_company,
     top_x_value,
 ) = select_data_filters(
-    df=df_original,
+    df=df_cleaned,
     date_column=date_column,
     # group_by_columns=group_by_columns,
     company_column=company_column,
@@ -101,17 +102,27 @@ st.write("Please make your filtering selections below:")
 
 
 # Create summary data outputs
-from calc_summary.calc_summary_outputs import generate_summary_outputs
 summary_dict = generate_summary_outputs(
     df_summary=df_summary,
     pkl_folder_name=pkl_folder_name,
     date_column=date_column,
     selected_date=selected_date,
     top_x_value=top_x_value,
-    outputs_config_dict=outputs_config_dict,
+    data_config_dict=data_config_dict,
 )
 
 # Create entity data outputs
+entity_dict = generate_entity_outputs(
+    df_cleaned=df_cleaned,
+    date_column=date_column,
+    selected_date=selected_date,
+    company_column=company_column,
+    selected_company=selected_company,
+    top_x_value=top_x_value,
+    pkl_folder_name=pkl_folder_name,
+    data_config_dict=data_config_dict,
+    color_discrete_map=color_discrete_map,
+)
 
 # Insert containers separated into tabs:
 tab_market, tab_loans, tab_deposits, tab_about = st.tabs(["Market Overview", "Loans", "Deposits", "About"])
@@ -130,6 +141,8 @@ with tab_loans:
         summary_dict=summary_dict,
         date_column=date_column,
         selected_date=selected_date,
+        entity_dict=entity_dict,
+        data_config_dict=data_config_dict,
     )
 
 # Deposits Tab
