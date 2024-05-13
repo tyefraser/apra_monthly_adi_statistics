@@ -46,7 +46,17 @@ def generate_loans_tab(
 
     # Accounts
     st.write("## Housing Market Accounts")
-    col_names = ['Total residents loans and finance leases']
+    col_names = [
+        'Total residents loans and finance leases',
+        'Loans to non-financial businesses',
+        'Loans to financial institutions',
+        'Loans to general government',
+        'Loans to households: Housing: Owner-occupied',
+        'Loans to households: Housing: Investment',
+        'Loans to households: Credit cards',
+        'Loans to households: Other',
+        'Loans to community service organisations',
+    ]
     for col_name in col_names:
         st.write(f"### {col_name}")
         entity_col_dict = entity_dict[col_name]

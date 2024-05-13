@@ -43,7 +43,7 @@ def load_url_xlsx():
         logger.info(f"Failed to download the file: {e}")
 
         # Set xlsx path
-        file_name = 'data/Monthly authorised deposit-taking institution statistics back-series March 2019 - December 2023.xlsx'
+        file_name = 'data_historical/Monthly authorised deposit-taking institution statistics back-series March 2019 - December 2023.xlsx'
         logger.info(f"Using alternative file: {file_name}")
     
     return file_name
@@ -216,7 +216,7 @@ def read_and_process_data(
         logger.error(f"Missing expected columns: {missing_columns}")
         raise ValueError(f"Missing expected columns: {missing_columns}")
     
-     # Identify columns in the DataFrame that are not in the expected columns list
+    # Identify columns in the DataFrame that are not in the expected columns list
     unexpected_columns = set(df.columns) - expected_columns
     if unexpected_columns:
         logger.info(f"Dropping unexpected columns: {unexpected_columns}")

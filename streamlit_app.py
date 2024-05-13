@@ -23,6 +23,7 @@ from calc_entity.calc_entity_outputs import generate_entity_outputs
 from tabs.tab_market_overview import generate_market_overview_tab
 from tabs.tab_loans import generate_loans_tab
 from tabs.tab_deposits import generate_deposits_tab
+from tabs.tab_other import generate_other_tab
 
 # Setup logging
 close_log_handlers()
@@ -125,7 +126,19 @@ entity_dict = generate_entity_outputs(
 )
 
 # Insert containers separated into tabs:
-tab_market, tab_loans, tab_deposits, tab_about = st.tabs(["Market Overview", "Loans", "Deposits", "About"])
+(
+    tab_market,
+    tab_loans,
+    tab_deposits,
+    tab_other,
+    tab_about
+) = st.tabs([
+    "Market Overview",
+    "Loans",
+    "Deposits",
+    "Other",
+    "About"
+])
 
 # Market Overview Tab
 with tab_market:
@@ -151,6 +164,18 @@ with tab_deposits:
         summary_dict=summary_dict,
         date_column=date_column,
         selected_date=selected_date,
+        entity_dict=entity_dict,
+        data_config_dict=data_config_dict,
+    )
+
+# Other Tab
+with tab_other:
+    generate_other_tab(
+        summary_dict=summary_dict,
+        date_column=date_column,
+        selected_date=selected_date,
+        entity_dict=entity_dict,
+        data_config_dict=data_config_dict,
     )
 
 
@@ -164,54 +189,3 @@ with tab_about:
 
 close_log_handlers()
 
-
-
-
-
-
-
-
-
-## 
-## # Generate Summary Dictionary
-## summary_dict=generate_summary(
-##     df=df,
-##     selected_date=selected_date,
-##     pkl_folder_name=pkl_folder_name,
-## )
-## 
-## # Filter data
-## dfs_dict, details_dicts = filter_data(
-##         df = df,
-##         date_column = date_column,
-##         selected_date = selected_date,
-##         group_by_columns=group_by_columns,
-##         selected_column = selected_column,
-##         company_column = company_column,
-##         selected_company = selected_company,
-##         top_x_company_list = top_x_company_list,
-## )
-## 
-## # Generate graphs
-## charts_dict = generate_charts(
-##     dfs_dict = dfs_dict,
-##     details_dicts = details_dicts,
-##     date_column = date_column,
-##     selected_date = selected_date,
-##     company_column = company_column,
-##     selected_company = selected_company,
-##     selected_column = selected_column,
-##     top_x_company_list = top_x_company_list,
-##     color_discrete_map = color_discrete_map,
-## )
-## 
-## # Generate Descriptions
-## descriptions_dict = generate_descriptions(
-##     dfs_dict = dfs_dict,
-##     date_column = date_column,
-##     selected_column = selected_column,
-##     company_column = company_column,
-##     selected_company = selected_company,
-##     aliases_dict = aliases_dict,
-##     details_dicts = details_dicts,
-## )
